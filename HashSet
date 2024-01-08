@@ -1,0 +1,29 @@
+import java.util.ArrayList;
+
+public class Hashset
+{
+    private ArrayList<String>[] data;
+
+    @SuppressWarnings("unchecked")
+    public Hashset(int size)
+    {
+        data = new ArrayList[size];
+
+        for (int i = 0; i < size; i++)
+        {
+            data[i] = new ArrayList<>();
+        }
+    }
+
+    public void add(String newString)
+    {
+        int index = Math.abs(newString.hashCode())%data.length;
+        data[index].add(newString);
+    }
+
+    public boolean contains(String str)
+    {
+        int index = Math.abs(str.hashCode())%data.length;
+        return data[index].contains(str);
+    }
+}
