@@ -1,0 +1,312 @@
+import java.util.Iterator;
+import java.lang.Iterable;
+import java.lang.IndexOutOfBoundsException;
+
+public class LinkedList<E> implements Iterable<E>
+{
+  private int size;
+  private LinkedListItem<E> first;
+  private LinkedListItem<E> last;
+
+  public Iterator<E> iterator()
+  {
+    var it = new LinkedListIterator<E>(first);
+    return it;
+  }
+
+  public LinkedList()
+  {
+    this.size = 0;
+    this.first = null;
+    this.last = null;
+  }
+
+  public int size()
+  {
+    return this.size;
+  }
+
+  public void add(E value, int index)
+  {
+    if (index < 0 || index > size)
+      throw new IndexOutOfBoundsException();
+    
+    var newItem = new LinkedListItem<E>(value);
+    if (initListIfEmpty(newItem))
+      return;
+
+    if (index == 0)
+    {
+      addFirstListItem(newItem);
+      return;
+    }
+
+    if (index == size)
+    {
+      addLastListItem(newItem);
+      return;
+    }
+
+    LinkedListItem<E> prev = findItem(index - 1);
+    var next = prev.getNext();
+
+    prev.setNext(newItem);
+    newItem.setNext(next);
+    size++;
+  }
+
+  public void addFirst(E value)
+  {
+    var newItem = new LinkedListItem<E>(value);
+    if (initListIfEmpty(newItem))
+      return;
+    
+    addFirstListItem(newItem);
+  }
+
+  public void addLast(E value)
+  {
+    var newItem = new LinkedListItem<E>(value);
+    if (initListIfEmpty(newItem))
+      return;
+
+    addLastListItem(newItem);
+  }
+
+  public E get(int index)
+  {
+    if (index < 0 ||index >= size)
+      throw new IndexOutOfBoundsException();
+
+    var item = findItem(index);
+    return item.getValue();
+  }
+
+  public E getFirst()
+  {
+    if (first == null)
+      throw new IndexOutOfBoundsException();
+    return first.getValue();
+  }
+
+  public E getLast()
+  {
+    if (last == null)
+      throw new IndexOutOfBoundsException();
+    return last.getValue();
+  }
+
+  public void remove(int index)
+  {
+    if (index < 0 || index >= size)
+      throw new IndexOutOfBoundsException();
+
+    if (cleanListIfEmptyInRemove())
+      return;
+
+    if (index == 0)
+    {
+      removeFirstItem();
+      return;
+    }
+
+    if (index == size - 1)
+    {
+      removeLastItem();
+      return;
+    }
+
+    var prev = findItem(index - 1);
+    var removed = prev.getNext();
+    var next = removed.getNext();
+    prev.setNext(next);
+    size--;
+  }
+
+  public void removeFirst()
+  {
+    if (first == null)
+      throw new IndexOutOfBoundsException();
+
+    if (cleanListIfEmptyInRemove())
+      return;
+    
+    removeFirstItem();
+  }
+
+  public void removeLast()
+  {
+    if (last == null)
+      throw new IndexOutOfBoundsException();
+
+    if (cleanListIfEmptyInRemove())
+      return;
+    
+    removeLastItem();
+  }
+  
+  private LinkedListItem<E> findItem(int index)
+  {
+    LinkedListItem<E> it = first;
+    for (int i = 0; i < index; i++)
+      it = it.getNext();
+
+    return it;
+  }
+
+  private void removeFirstItem()
+  {
+    first = first.getNext();
+    size--;
+  }
+
+  private void removeLastItem()
+  {
+    var prev = findItem(size - 2);
+    last = prev;
+    prev.setNext(null);
+    size--;
+  }
+  
+  private void addLastListItem(LinkedListItem<E> item)
+  {
+    last.setNext(item);
+    last = item;
+    size++;
+  }
+
+  private void addFirstListItem(LinkedListItem<E> item)
+  {
+    item.setNext(first);
+    first = item;
+    size++;
+  }
+
+  private Boolean cleanListIfEmptyInRemove()
+  {
+    if (size > 1)
+      return false;
+    
+    first = null;
+    last = null;
+    size = 0;
+    return true;
+  }
+  
+  private Boolean initListIfEmpty(LinkedListItem<E> item)
+  { 
+    if (size > 0)
+      return false;
+    
+    size = 1;
+    first = item;
+    last = item;
+    return true;
+  }
+}
+
+===========================================================================================================================================
+
+public class LinkedListItem<E>
+{
+  private E value;
+  private LinkedListItem<E> next;
+
+  public LinkedListItem(E value)
+  {
+    this.value = value;
+    this.next = null;
+  }
+
+  public E getValue() {
+    return this.value;
+  }
+
+  public void setValue(E value) {
+    this.value = value;
+  }
+
+  public LinkedListItem<E> getNext() {
+    return this.next;
+  }
+
+  public void setNext(LinkedListItem<E> value) {
+    this.next = value;
+  }
+}
+
+===========================================================================================================================================
+
+import java.util.Iterator;
+
+public class LinkedListIterator<E> implements Iterator<E>
+{
+  private LinkedListItem<E> current;
+  private LinkedListItem<E> first;
+  public LinkedListIterator(LinkedListItem<E> first)
+  {
+    this.first = first;
+    this.current = null;
+  }
+  
+  public E next()
+  {
+    current =
+      current == null ?
+      first : current.getNext();
+
+    return current.getValue();
+  }
+
+  public boolean hasNext() {
+    return current == null && first != null 
+      || current.getNext() != null;
+  }
+
+  public void remove() { }
+}
+
+===========================================================================================================================================
+
+import java.util.Comparator;
+
+public class PriorityQueue<E>
+{
+  Comparator<E> comparator;
+  LinkedList<E> list;
+
+  public PriorityQueue(Comparator<E> comparator)
+  {
+    this.comparator = comparator;
+    this.list = new LinkedList<E>();
+  }
+
+  public int size() {
+    return list.size();
+  }
+
+  public void add(E value)
+  {
+    int index = 0;
+    var it = list.iterator();
+    while (it.hasNext())
+    {
+      if (comparator.compare(value, it.next() < 0))
+          break;
+          
+      index++;
+    }
+    
+    this.list.add(value, index);
+  }
+  
+  public E peek() {
+    return list.getLast();
+  }
+
+  public E pool() {
+    var value = list.getLast();
+    list.removeLast();
+    return value;
+  }
+}
